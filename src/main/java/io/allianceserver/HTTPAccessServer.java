@@ -31,7 +31,7 @@ public class HTTPAccessServer {
     }
 
     public HTTPAccessServer() {
-        this(4567, "public");
+        this("public");
     }
 
     private void start() {

@@ -5,6 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TCPServer {
@@ -30,6 +34,9 @@ public class TCPServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
+                            ch.pipeline().addLast(new LineBasedFrameDecoder(8192));
+                            ch.pipeline().addLast(new StringDecoder());
+                            ch.pipeline().addLast(new StringEncoder());
                             ch.pipeline().addLast(new GameServerHandler());
                         }
                     });
@@ -48,12 +55,13 @@ public class TCPServer {
         public void channelActive(ChannelHandlerContext ctx) {
             players.put(ctx.channel().id(), ctx.channel());
             System.out.println("Nuovo giocatore connesso: " + ctx.channel().remoteAddress());
+            ctx.writeAndFlush("Ciao, benvenuto!\n");
         }
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, String msg) {
             System.out.println("Ricevuto: " + msg);
-            // Invia il messaggio a tutti i giocatori connessi
+
             for (Channel ch : players.values()) {
                 if (ch != ctx.channel()) {
                     ch.writeAndFlush("Broadcast: " + msg + "\n");
