@@ -14,7 +14,7 @@ import static spark.Spark.*;
 public class HTTPAccessServer {
     private final int HTTP_PORT;
     private final String ASSETS_DIR;
-    private Gson gson;
+    private final Gson gson;
 
     public HTTPAccessServer(int port, String assetsDir) {
         this.HTTP_PORT = port;

@@ -9,11 +9,32 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    archiveFileName.set("server.jar")
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+    dependencies {
+        exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
+    }
+
+    manifest {
+        attributes 'Main-Class': "io.allianceserver.Main"
+    }
+
+    doLast {
+        file(archiveFile).setExecutable(true, false)
+    }
+}
+
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation "com.sparkjava:spark-core:2.9.4"
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'io.netty:netty-all:4.1.96.Final'
 }
 
 test {
