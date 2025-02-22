@@ -37,7 +37,7 @@ public class HTTPAccessServer {
     private void start() {
         get("/assets", (req, res) -> {
             File folder = new File(ASSETS_DIR);
-            Map<String, Object> fileStructure = exploreDirectory(folder);
+            List<Object> fileStructure = exploreDirectory(folder);
 
             res.type("application/json");
             return gson.toJson(fileStructure);
@@ -67,27 +67,25 @@ public class HTTPAccessServer {
         System.out.println("HTTP Asset Server avviato sulla porta " + HTTP_PORT + " con root in " + ASSETS_DIR);
     }
 
-    private static Map<String, Object> exploreDirectory(File folder) {
-        Map<String, Object> fileMap = new HashMap<>();
-        fileMap.put("name", folder.getName());
-        fileMap.put("type", "cartella");
-
+    private static List<Object> exploreDirectory(File folder) {
         List<Object> contents = new ArrayList<>();
         File[] files = folder.listFiles();
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    contents.add(exploreDirectory(file));
+                    Map<String, Object> dirMap = new HashMap<>();
+                    dirMap.put("name", file.getName());
+                    dirMap.put("type", "cartella");
+                    dirMap.put("contents", exploreDirectory(file));
+                    contents.add(dirMap);
                 } else {
-                    Map<String, Object> fileObject = new HashMap<>();
-                    fileObject.put("name", file.getName());
-                    fileObject.put("type", "file");
-                    contents.add(fileObject);
+                    Map<String, Object> fileMap = new HashMap<>();
+                    fileMap.put("name", file.getName());
+                    fileMap.put("type", "file");
+                    contents.add(fileMap);
                 }
             }
         }
-
-        fileMap.put("contents", contents);
-        return fileMap;
+        return contents;
     }
 }
